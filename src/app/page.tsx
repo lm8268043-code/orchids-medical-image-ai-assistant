@@ -181,7 +181,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasUploadedImage, setHasUploadedImage] = useState(false);
   const [activeTab, setActiveTab] = useState<"home" | "ai" | "history">("home");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedHistory, setSelectedHistory] = useState<HistoryItem | null>(null);
   const [analysisHistory, setAnalysisHistory] = useState<HistoryItem[]>([
     { id: "1", title: "Paracetamol Analysis", date: "Today", preview: "500mg tablet identification and usage guidelines..." },
@@ -368,7 +368,7 @@ export default function Home() {
     return content.split("\n").map((line, i) => {
       if (line.startsWith("**") && line.endsWith("**")) {
         return (
-          <p key={i} className="font-semibold text-white mt-4 mb-2 text-base">
+          <p key={i} className="font-semibold text-white mt-4 mb-2 text-sm sm:text-base">
             {line.slice(2, -2)}
           </p>
         );
@@ -376,21 +376,21 @@ export default function Home() {
       if (line.match(/^\*\*[^*]+\*\*$/)) {
         const text = line.replace(/\*\*/g, "");
         return (
-          <p key={i} className="font-semibold text-white mt-4 mb-2 text-base">
+          <p key={i} className="font-semibold text-white mt-4 mb-2 text-sm sm:text-base">
             {text}
           </p>
         );
       }
       if (line.startsWith("- ") || line.startsWith("• ")) {
         return (
-          <li key={i} className="ml-5 text-slate-300 leading-relaxed list-disc">
+          <li key={i} className="ml-5 text-slate-300 leading-relaxed list-disc text-sm sm:text-base">
             {line.slice(2)}
           </li>
         );
       }
       if (line.match(/^\d+\./)) {
         return (
-          <li key={i} className="ml-5 text-slate-300 leading-relaxed list-decimal">
+          <li key={i} className="ml-5 text-slate-300 leading-relaxed list-decimal text-sm sm:text-base">
             {line.replace(/^\d+\.\s*/, "")}
           </li>
         );
@@ -402,7 +402,7 @@ export default function Home() {
         return <hr key={i} className="my-4 border-slate-700" />;
       }
       return (
-        <p key={i} className="text-slate-300 leading-relaxed">
+        <p key={i} className="text-slate-300 leading-relaxed text-sm sm:text-base">
           {line}
         </p>
       );
@@ -426,65 +426,114 @@ export default function Home() {
     <div className="min-h-screen flex bg-slate-900 relative overflow-hidden">
       <MedicalBackground />
       
-      <aside className={`${sidebarOpen ? "w-72" : "w-20"} bg-slate-900/80 backdrop-blur-2xl border-r border-white/10 flex flex-col transition-all duration-300 relative z-20`}>
-        <div className="p-5 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/30 animate-pulse-soft">
-              <Plus className="w-6 h-6 text-white" />
-            </div>
-            {sidebarOpen && (
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <aside className={`
+        fixed lg:relative
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+        w-72 lg:w-72
+        bg-slate-900/95 lg:bg-slate-900/80 
+        backdrop-blur-2xl 
+        border-r border-white/10 
+        flex flex-col 
+        transition-transform duration-300 
+        z-50 lg:z-20
+        h-full
+      `}>
+        <div className="p-4 sm:p-5 border-b border-white/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/30 animate-pulse-soft">
+                <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              </div>
               <div>
-                <h1 className="text-xl font-bold text-white">
+                <h1 className="text-lg sm:text-xl font-bold text-white">
                   MediCare AI
                 </h1>
-                <p className="text-[11px] text-sky-400 font-medium tracking-wider uppercase">Medical Assistant</p>
+                <p className="text-[10px] sm:text-[11px] text-sky-400 font-medium tracking-wider uppercase">Medical Assistant</p>
               </div>
-            )}
+            </div>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden text-slate-400 hover:text-white p-2"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-3 sm:p-4 space-y-2 overflow-y-auto">
           {navItems.map(({ id, icon: Icon, label }) => (
             <button
               key={id}
-              onClick={() => setActiveTab(id)}
-              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300 ${
+              onClick={() => {
+                setActiveTab(id);
+                setSidebarOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl transition-all duration-300 touch-manipulation ${
                 activeTab === id
                   ? "bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30"
                   : "text-slate-400 hover:text-white hover:bg-white/5"
               }`}
             >
               <Icon className={`w-5 h-5 shrink-0 ${activeTab === id ? "animate-pulse" : ""}`} />
-              {sidebarOpen && <span className="font-medium">{label}</span>}
+              <span className="font-medium text-sm sm:text-base">{label}</span>
             </button>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-white/10">
+        <div className="p-3 sm:p-4 border-t border-white/10">
           <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden w-full flex items-center justify-center gap-2 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all touch-manipulation"
           >
-            <Menu className="w-5 h-5" />
-            {sidebarOpen && <span className="text-sm font-medium">Collapse</span>}
+            <X className="w-5 h-5" />
+            <span className="text-sm font-medium">Close Menu</span>
           </button>
         </div>
       </aside>
 
       <main className="flex-1 relative z-10 overflow-auto">
+        {/* Mobile Header - Hamburger Menu */}
+        <div className="lg:hidden sticky top-0 z-30 bg-slate-900/95 backdrop-blur-2xl border-b border-white/10 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="text-white p-2 hover:bg-white/5 rounded-lg transition-colors touch-manipulation"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center">
+                <Plus className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-base font-bold text-white">MediCare AI</span>
+            </div>
+            <div className="w-10" />
+          </div>
+        </div>
+
         {activeTab === "home" && (
           <div className="min-h-screen flex flex-col">
-            <header className="px-8 py-6">
+            {/* Desktop Header */}
+            <header className="hidden lg:block px-4 sm:px-8 py-4 sm:py-6">
               <nav className="flex items-center justify-between max-w-6xl mx-auto">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center">
-                    <Plus className="w-5 h-5 text-white" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center">
+                    <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
-                  <span className="text-xl font-bold text-white">MediCare AI</span>
+                  <span className="text-lg sm:text-xl font-bold text-white">MediCare AI</span>
                 </div>
                 <Button 
                   onClick={() => setActiveTab("ai")}
-                  className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white rounded-xl px-6 shadow-lg shadow-sky-500/30"
+                  className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white rounded-xl px-4 sm:px-6 shadow-lg shadow-sky-500/30 text-sm sm:text-base touch-manipulation"
                 >
                   Try AI Analysis
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -492,30 +541,30 @@ export default function Home() {
               </nav>
             </header>
 
-            <div className="flex-1 flex items-center justify-center px-8 py-12">
-              <div className="max-w-6xl mx-auto text-center">
-                <div className="mb-8 inline-flex items-center gap-2 px-4 py-2 bg-sky-500/10 border border-sky-500/20 rounded-full">
-                  <Sparkles className="w-4 h-4 text-sky-400" />
-                  <span className="text-sm text-sky-300 font-medium">Powered by Advanced AI</span>
+            <div className="flex-1 flex items-center justify-center px-4 sm:px-8 py-8 sm:py-12">
+              <div className="max-w-6xl mx-auto text-center w-full">
+                <div className="mb-6 sm:mb-8 inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-sky-500/10 border border-sky-500/20 rounded-full">
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-sky-400" />
+                  <span className="text-xs sm:text-sm text-sky-300 font-medium">Powered by Advanced AI</span>
                 </div>
                 
-                <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight px-4">
                   Your Personal
                   <span className="block bg-gradient-to-r from-sky-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
                     Medical AI Assistant
                   </span>
                 </h1>
                 
-                <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                <p className="text-base sm:text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed px-4">
                   Upload images of medicines, prescriptions, or lab reports and get instant AI-powered analysis. 
                   Understanding your health has never been easier.
                 </p>
 
-                <div className="flex items-center justify-center gap-4 mb-16">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-12 sm:mb-16 px-4">
                   <Button 
                     onClick={() => setActiveTab("ai")}
                     size="lg"
-                    className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white rounded-xl px-8 py-6 text-lg shadow-xl shadow-sky-500/30 transition-all hover:scale-105"
+                    className="w-full sm:w-auto bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white rounded-xl px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg shadow-xl shadow-sky-500/30 transition-all hover:scale-105 touch-manipulation min-h-[44px]"
                   >
                     <Brain className="w-5 h-5 mr-2" />
                     Start AI Analysis
@@ -524,45 +573,45 @@ export default function Home() {
                     onClick={() => setActiveTab("history")}
                     variant="outline"
                     size="lg"
-                    className="border-white/20 text-white hover:bg-white/10 rounded-xl px-8 py-6 text-lg transition-all"
+                    className="w-full sm:w-auto border-white/20 text-white hover:bg-white/10 rounded-xl px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg transition-all touch-manipulation min-h-[44px]"
                   >
                     <History className="w-5 h-5 mr-2" />
                     View History
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 px-4">
                   {features.map(({ icon: Icon, title, desc }) => (
                     <div 
                       key={title} 
-                      className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-sky-500/30 hover:bg-white/10 transition-all duration-300 group"
+                      className="bg-white/5 backdrop-blur-xl rounded-2xl p-5 sm:p-6 border border-white/10 hover:border-sky-500/30 hover:bg-white/10 transition-all duration-300 group"
                     >
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-sky-500/20 to-blue-600/20 flex items-center justify-center mb-4 group-hover:from-sky-500/30 group-hover:to-blue-600/30 transition-all">
-                        <Icon className="w-7 h-7 text-sky-400" />
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-sky-500/20 to-blue-600/20 flex items-center justify-center mb-3 sm:mb-4 group-hover:from-sky-500/30 group-hover:to-blue-600/30 transition-all">
+                        <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-sky-400" />
                       </div>
-                      <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
-                      <p className="text-sm text-slate-400">{desc}</p>
+                      <h3 className="text-base sm:text-lg font-semibold text-white mb-2">{title}</h3>
+                      <p className="text-xs sm:text-sm text-slate-400">{desc}</p>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-16 flex items-center justify-center gap-8 text-slate-500">
+                <div className="mt-12 sm:mt-16 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-slate-500 px-4">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-500" />
-                    <span>Free to use</span>
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                    <span className="text-sm sm:text-base">Free to use</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-500" />
-                    <span>No sign-up required</span>
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                    <span className="text-sm sm:text-base">No sign-up required</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-500" />
-                    <span>Instant results</span>
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                    <span className="text-sm sm:text-base">Instant results</span>
                   </div>
                 </div>
 
-                <div className="mt-12 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl max-w-2xl mx-auto">
-                  <p className="text-sm text-amber-300">
+                <div className="mt-8 sm:mt-12 p-3 sm:p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl max-w-2xl mx-auto">
+                  <p className="text-xs sm:text-sm text-amber-300 px-2">
                     <span className="font-semibold">Disclaimer:</span> This tool provides information for educational purposes only. 
                     Always consult a qualified healthcare professional for medical advice.
                   </p>
@@ -574,33 +623,34 @@ export default function Home() {
 
         {activeTab === "ai" && (
           <>
-            <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-2xl border-b border-white/10 px-6 py-4">
+            <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-2xl border-b border-white/10 px-4 sm:px-6 py-3 sm:py-4">
               <div className="flex items-center justify-between max-w-5xl mx-auto">
                 <div>
-                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <Brain className="w-6 h-6 text-sky-400" />
+                  <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                    <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-sky-400" />
                     AI Analysis
                   </h2>
-                  <p className="text-sm text-slate-400">Upload medical images for instant AI analysis</p>
+                  <p className="text-xs sm:text-sm text-slate-400 hidden sm:block">Upload medical images for instant AI analysis</p>
                 </div>
                 {hasUploadedImage && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={startNewChat}
-                    className="border-white/20 text-white hover:bg-white/10 rounded-xl gap-2"
+                    className="border-white/20 text-white hover:bg-white/10 rounded-xl gap-2 text-xs sm:text-sm touch-manipulation min-h-[44px] px-3 sm:px-4"
                   >
                     <Plus className="w-4 h-4" />
-                    New Analysis
+                    <span className="hidden sm:inline">New Analysis</span>
+                    <span className="sm:hidden">New</span>
                   </Button>
                 )}
               </div>
             </header>
 
-            <div className="p-6 max-w-5xl mx-auto">
+            <div className="p-4 sm:p-6 max-w-5xl mx-auto">
               {!hasUploadedImage ? (
-                <div className="space-y-8">
-                  <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/10">
+                <div className="space-y-6 sm:space-y-8">
+                  <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/10">
                     <input
                       type="file"
                       ref={fileInputRef}
@@ -612,48 +662,48 @@ export default function Home() {
                     {!imagePreview ? (
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-full border-2 border-dashed border-white/20 rounded-2xl p-16 hover:border-sky-400/50 hover:bg-sky-500/5 transition-all group"
+                        className="w-full border-2 border-dashed border-white/20 rounded-2xl p-8 sm:p-16 hover:border-sky-400/50 hover:bg-sky-500/5 transition-all group touch-manipulation"
                       >
-                        <div className="flex flex-col items-center gap-5">
-                          <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-sky-500/20 to-blue-600/20 flex items-center justify-center group-hover:from-sky-500/30 group-hover:to-blue-600/30 transition-all animate-pulse-soft">
-                            <Upload className="w-12 h-12 text-sky-400" />
+                        <div className="flex flex-col items-center gap-4 sm:gap-5">
+                          <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-sky-500/20 to-blue-600/20 flex items-center justify-center group-hover:from-sky-500/30 group-hover:to-blue-600/30 transition-all animate-pulse-soft">
+                            <Upload className="w-8 h-8 sm:w-12 sm:h-12 text-sky-400" />
                           </div>
                           <div>
-                            <p className="font-semibold text-white text-xl">Click to upload medical image</p>
-                            <p className="text-sm text-slate-400 mt-2">Supports JPG, PNG, GIF up to 10MB</p>
+                            <p className="font-semibold text-white text-base sm:text-xl">Click to upload medical image</p>
+                            <p className="text-xs sm:text-sm text-slate-400 mt-1 sm:mt-2">Supports JPG, PNG, GIF up to 10MB</p>
                           </div>
                         </div>
                       </button>
                     ) : (
-                      <div className="space-y-5">
+                      <div className="space-y-4 sm:space-y-5">
                         <div className="relative rounded-2xl overflow-hidden bg-slate-800/50 flex items-center justify-center p-4">
                           <Image
                             src={imagePreview}
                             alt="Preview"
                             width={400}
                             height={300}
-                            className="object-contain max-h-72 rounded-xl"
+                            className="object-contain max-h-48 sm:max-h-72 rounded-xl w-full"
                           />
                           <button
                             onClick={removeImage}
-                            className="absolute top-4 right-4 w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+                            className="absolute top-2 right-2 sm:top-4 sm:right-4 w-10 h-10 sm:w-12 sm:h-12 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg touch-manipulation"
                           >
-                            <X className="w-5 h-5" />
+                            <X className="w-5 h-5 sm:w-6 sm:h-6" />
                           </button>
                         </div>
                         <Button
                           onClick={analyzeImage}
                           disabled={isLoading}
-                          className="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white py-7 text-lg font-semibold rounded-xl shadow-lg shadow-sky-500/30 transition-all"
+                          className="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white py-5 sm:py-7 text-base sm:text-lg font-semibold rounded-xl shadow-lg shadow-sky-500/30 transition-all touch-manipulation min-h-[44px]"
                         >
                           {isLoading ? (
                             <>
-                              <Loader2 className="w-6 h-6 mr-3 animate-spin" />
+                              <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 animate-spin" />
                               Analyzing Image...
                             </>
                           ) : (
                             <>
-                              <Sparkles className="w-6 h-6 mr-3" />
+                              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                               Analyze with AI
                             </>
                           )}
@@ -662,59 +712,59 @@ export default function Home() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     {[
                       { icon: Pill, label: "Medicines", desc: "Tablets & Capsules", color: "from-sky-500 to-blue-500" },
                       { icon: FileText, label: "Prescriptions", desc: "Doctor Orders", color: "from-rose-500 to-pink-500" },
                       { icon: ClipboardList, label: "Lab Reports", desc: "Test Results", color: "from-violet-500 to-purple-500" },
                     ].map(({ icon: Icon, label, desc, color }) => (
-                      <div key={label} className="bg-white/5 backdrop-blur-xl rounded-xl p-5 text-center border border-white/10 hover:border-sky-500/30 transition-all cursor-default group">
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mx-auto mb-3 shadow-lg group-hover:scale-110 transition-transform`}>
-                          <Icon className="w-6 h-6 text-white" />
+                      <div key={label} className="bg-white/5 backdrop-blur-xl rounded-xl p-4 sm:p-5 text-center border border-white/10 hover:border-sky-500/30 transition-all cursor-default group">
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mx-auto mb-2 sm:mb-3 shadow-lg group-hover:scale-110 transition-transform`}>
+                          <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                         </div>
-                        <p className="font-semibold text-white">{label}</p>
+                        <p className="font-semibold text-white text-sm sm:text-base">{label}</p>
                         <p className="text-xs text-slate-400 mt-1">{desc}</p>
                       </div>
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div
                     ref={scrollAreaRef}
-                    className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 min-h-[450px] max-h-[65vh] overflow-y-auto border border-white/10"
+                    className="bg-white/5 backdrop-blur-xl rounded-2xl p-4 sm:p-6 min-h-[400px] sm:min-h-[450px] max-h-[55vh] sm:max-h-[65vh] overflow-y-auto border border-white/10"
                   >
                     {messages.map((msg, i) => (
                       <div
                         key={i}
-                        className={`mb-5 animate-fade-in ${
+                        className={`mb-4 sm:mb-5 animate-fade-in ${
                           msg.role === "user" ? "flex justify-end" : "flex justify-start"
                         }`}
                       >
                         {msg.role === "assistant" && (
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center mr-3 shadow-lg shrink-0">
-                            <MessageCircle className="w-5 h-5 text-white" />
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center mr-2 sm:mr-3 shadow-lg shrink-0">
+                            <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                           </div>
                         )}
                         <div
-                          className={`max-w-[80%] rounded-2xl px-5 py-4 ${
+                          className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4 ${
                             msg.role === "user"
                               ? "bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30"
                               : "bg-slate-800/80 text-slate-200 border border-white/10"
                           }`}
                         >
                           {msg.image && (
-                            <div className="mb-4 rounded-xl overflow-hidden">
+                            <div className="mb-3 sm:mb-4 rounded-xl overflow-hidden">
                               <Image
                                 src={msg.image}
                                 alt="Uploaded"
                                 width={280}
                                 height={200}
-                                className="object-contain"
+                                className="object-contain w-full"
                               />
                             </div>
                           )}
-                          <div className="text-sm">
+                          <div className="text-sm sm:text-base">
                             {msg.role === "user" ? (
                               <p className="font-medium">{msg.content}</p>
                             ) : (
@@ -726,35 +776,35 @@ export default function Home() {
                     ))}
                     {isLoading && (
                       <div className="flex justify-start mb-4">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center mr-3 shadow-lg">
-                          <MessageCircle className="w-5 h-5 text-white" />
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center mr-2 sm:mr-3 shadow-lg">
+                          <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                         </div>
-                        <div className="bg-slate-800/80 rounded-2xl px-5 py-4 border border-white/10">
+                        <div className="bg-slate-800/80 rounded-2xl px-4 py-3 sm:px-5 sm:py-4 border border-white/10">
                           <div className="flex items-center gap-2">
-                            <div className="w-2.5 h-2.5 bg-sky-500 rounded-full animate-typing-1" />
-                            <div className="w-2.5 h-2.5 bg-sky-500 rounded-full animate-typing-2" />
-                            <div className="w-2.5 h-2.5 bg-sky-500 rounded-full animate-typing-3" />
+                            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-sky-500 rounded-full animate-typing-1" />
+                            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-sky-500 rounded-full animate-typing-2" />
+                            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-sky-500 rounded-full animate-typing-3" />
                           </div>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10">
-                    <div className="flex items-center gap-3">
+                  <div className="bg-white/5 backdrop-blur-xl rounded-xl p-3 sm:p-4 border border-white/10">
+                    <div className="flex items-end gap-2 sm:gap-3">
                       <Textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Ask a follow-up question..."
-                        className="min-h-[50px] max-h-28 resize-none border-0 bg-transparent focus-visible:ring-0 text-base text-white placeholder:text-slate-500"
+                        className="min-h-[44px] sm:min-h-[50px] max-h-28 resize-none border-0 bg-transparent focus-visible:ring-0 text-sm sm:text-base text-white placeholder:text-slate-500"
                         rows={1}
                       />
                       <Button
                         onClick={sendFollowUp}
                         disabled={isLoading || !input.trim()}
                         size="icon"
-                        className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 shadow-lg shadow-sky-500/30 disabled:opacity-50 transition-all"
+                        className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 shadow-lg shadow-sky-500/30 disabled:opacity-50 transition-all touch-manipulation"
                       >
                         {isLoading ? (
                           <Loader2 className="w-5 h-5 animate-spin" />
@@ -772,27 +822,30 @@ export default function Home() {
 
         {activeTab === "history" && (
           <>
-            <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-2xl border-b border-white/10 px-6 py-4">
+            <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-2xl border-b border-white/10 px-4 sm:px-6 py-3 sm:py-4">
               <div className="flex items-center justify-between max-w-5xl mx-auto">
                 <div>
-                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <History className="w-6 h-6 text-sky-400" />
+                  <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                    <History className="w-5 h-5 sm:w-6 sm:h-6 text-sky-400" />
                     Analysis History
                   </h2>
-                  <p className="text-sm text-slate-400">Browse your previous medical analyses</p>
+                  <p className="text-xs sm:text-sm text-slate-400 hidden sm:block">Browse your previous medical analyses</p>
                 </div>
               </div>
             </header>
 
-            <div className="p-6 max-w-5xl mx-auto">
+            <div className="p-4 sm:p-6 max-w-5xl mx-auto">
               {analysisHistory.length === 0 ? (
-                <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-12 border border-white/10 text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-4">
-                    <History className="w-8 h-8 text-slate-500" />
+                <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 sm:p-12 border border-white/10 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <History className="w-6 h-6 sm:w-8 sm:h-8 text-slate-500" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">No History Yet</h3>
-                  <p className="text-slate-400 mb-4">Your analysis history will appear here</p>
-                  <Button onClick={() => setActiveTab("ai")} className="bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl">
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-2">No History Yet</h3>
+                  <p className="text-sm sm:text-base text-slate-400 mb-4">Your analysis history will appear here</p>
+                  <Button 
+                    onClick={() => setActiveTab("ai")} 
+                    className="bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl touch-manipulation min-h-[44px]"
+                  >
                     Start First Analysis
                   </Button>
                 </div>
@@ -801,27 +854,27 @@ export default function Home() {
                   {analysisHistory.map((item) => (
                     <div
                       key={item.id}
-                      className="bg-white/5 backdrop-blur-xl rounded-xl p-5 border border-white/10 hover:border-sky-500/30 transition-all group"
+                      className="bg-white/5 backdrop-blur-xl rounded-xl p-4 sm:p-5 border border-white/10 hover:border-sky-500/30 transition-all group"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-start gap-4 flex-1">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500/20 to-blue-600/20 flex items-center justify-center group-hover:from-sky-500/30 group-hover:to-blue-600/30 transition-colors">
-                            <FileText className="w-6 h-6 text-sky-400" />
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex items-start gap-3 sm:gap-4 flex-1">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-sky-500/20 to-blue-600/20 flex items-center justify-center group-hover:from-sky-500/30 group-hover:to-blue-600/30 transition-colors shrink-0">
+                            <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-sky-400" />
                           </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-white">{item.title}</h4>
-                            <p className="text-sm text-slate-400 mt-1">{item.preview}</p>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-white text-sm sm:text-base">{item.title}</h4>
+                            <p className="text-xs sm:text-sm text-slate-400 mt-1 line-clamp-2">{item.preview}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 pl-13 sm:pl-0">
                           <span className="text-xs text-slate-500 font-medium">{item.date}</span>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => setSelectedHistory(item)}
-                            className="border-white/20 text-white hover:bg-white/10 rounded-lg"
+                            className="border-white/20 text-white hover:bg-white/10 rounded-lg text-xs sm:text-sm touch-manipulation min-h-[36px] px-3"
                           >
-                            <Eye className="w-4 h-4 mr-1" />
+                            <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                             View
                           </Button>
                         </div>
@@ -832,16 +885,25 @@ export default function Home() {
               )}
 
               {selectedHistory && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedHistory(null)}>
-                  <div className="bg-slate-900 rounded-2xl p-6 max-w-2xl w-full border border-white/10 max-h-[80vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+                <div 
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" 
+                  onClick={() => setSelectedHistory(null)}
+                >
+                  <div 
+                    className="bg-slate-900 rounded-2xl p-5 sm:p-6 max-w-2xl w-full border border-white/10 max-h-[80vh] overflow-auto" 
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-bold text-white">{selectedHistory.title}</h3>
-                      <button onClick={() => setSelectedHistory(null)} className="text-slate-400 hover:text-white">
-                        <X className="w-6 h-6" />
+                      <h3 className="text-lg sm:text-xl font-bold text-white pr-4">{selectedHistory.title}</h3>
+                      <button 
+                        onClick={() => setSelectedHistory(null)} 
+                        className="text-slate-400 hover:text-white p-2 -m-2 touch-manipulation"
+                      >
+                        <X className="w-5 h-5 sm:w-6 sm:h-6" />
                       </button>
                     </div>
-                    <p className="text-slate-300">{selectedHistory.preview}</p>
-                    <p className="text-sm text-slate-500 mt-4">Analyzed: {selectedHistory.date}</p>
+                    <p className="text-sm sm:text-base text-slate-300">{selectedHistory.preview}</p>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-4">Analyzed: {selectedHistory.date}</p>
                   </div>
                 </div>
               )}

@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://medicare-ai.vercel.app
+
+# Sitemaps
+Sitemap: https://medicare-ai.vercel.app/sitemap.xml
